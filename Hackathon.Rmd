@@ -18,12 +18,14 @@ output:
 * This is what makes R so powerful _but also intimidating_
 * Some functions are available just by opening R but it would be inefficient to include them all
 * You need to determine which external functions you want to use for each project
-* To get started, we will look at 6 functions that cover most data manipulation needs
-* These functions (along with others not covered here) are bundled together in the [dplyr](https://dplyr.tidyverse.org/) package
-  * **Terminology**: A "package" (or "library") is a bundle of functions that extends the base R vocabulary
-  * **Syntax**: Throughout this R Markdown document, in line functions and object names will be written `like_this`
+* To get started, we will focus on 6 functions (along with some others not covered here) bundled together in the [dplyr](https://dplyr.tidyverse.org/) package
+* Later in this tutorial, we'll introduce you to the `tidyr` and `ggplot2` packages for easy data pivoting and layer-based visualizations
+* **Terminology**: A "package" (or "library") is a bundle of functions that extends the base R vocabulary
+* **Syntax**: Throughout this R Markdown document, in line functions and object names will be written `like_this`
 
-**THE 6 DPLYR FUNCTIONS COVERED:**  
+![](dplyr.png){width=30%}
+
+**THE 6 DPLYR FUNCTIONS COVERED:**
 
 * `group_by()`:  as the name implies - use this to determine what you want to group your data by
 * `summarise()`:  used in tandem with group_by - use this to determine what to summarise within selected groups
@@ -57,7 +59,7 @@ Before we start coding - you should save the following files from the git reposi
 
 Most important is the csv file.  This will be used in a later section.  
 
-# 3. IMPORT REQUIRED PACKAGES  
+# 3. IMPORT REQUIED PACKAGES  
 
 ```{r message=FALSE, echo=TRUE, fig.align='center', warning=FALSE}
 
@@ -65,6 +67,7 @@ Most important is the csv file.  This will be used in a later section.
 
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 library(data.table)
 library(plotly)
 
@@ -84,7 +87,7 @@ You only need to install packages once.  You need to activate selected packages 
 * `library(package_name)`:  makes all functions contained within selected package available during the current R working session
 
 * Base R functions are accessible without the need to load any packages
-  * Fun fact: Base R was used to develop many of the `dplyr` functions
+* Fun fact: Base R was used to develop many of the `dplyr` functions
 
 
 # 4. IMPORT & EXPORT DATA 
@@ -123,7 +126,7 @@ df.mapping <- fread('clarity_map.csv')
 DECONSTRUCTING CODE ABOVE:  
 
 * The left arrow `<-` should be interpreted as "Create a new object"
-  * This is also known as the "assign operator"
+* This is also known as the "assign operator"
 * NOTE: Two functions demonstrated for importing data: `fread()` and `read.csv()`  
 * INTERPRET: `read.csv('file.csv')` AS  "import into this active R session ('file.csv')  
 * INTERPRET: `fread.csv('file.csv')` AS "import into this active R session ('file.csv') - and do it much faster than read.csv would.  
@@ -206,8 +209,6 @@ df.mapping <- read.csv('clarity_map.csv')
 df.mapping %>%
   kbl(caption = "") %>%
   kable_classic(full_width = F, html_font = "Cambria")
-
-
 
 ```
 
@@ -354,8 +355,8 @@ df.chained <- df.diamonds %>%
   mutate(average.price = Total.Price/Observations) %>%
   inner_join(df.mapping, by = 'clarity') %>%
   mutate(clarity.map2 = if_else(clarity %in% c('I1','SI2'),'Bad',
-                              if_else(clarity %in% c('SI1','VS2','VS1','VVS2'),'Medium',
-                                     if_else(clarity %in% c('VVS1','1F'),'Good','Undefined'))),
+                                if_else(clarity %in% c('SI1','VS2','VS1','VVS2'),'Medium',
+                                        if_else(clarity %in% c('VVS1','1F'),'Good','Undefined'))),
          clarity.map3 = case_when(clarity %in% c('I1','SI2') ~ 'Bad',
                                   clarity %in% c('SI1','VS2','VS1','VVS2') ~ 'Medium',
                                   clarity %in% c('VVS1','IF') ~ 'Good',
@@ -365,10 +366,143 @@ df.chained <- df.diamonds %>%
 
 ```
 
-# 11.  GGPLOT2  INTRO
+# 11. TIDYR INTRO
+
+![](tidyr.png){width=30%}
+
+The two main functions that we'll learn about from the `tidyr` package are `pivot_longer()` and `pivot_wider()`. Pivoting your data longer will increase the number of observations (rows) but decrease the number of variables (columns). Pivoting your data longer will decrease the number of observations but increase the number of variables.
+
+For this `tidyr` overview, we're going to step away from the `df.diamonds` object and load / assign a new object, `tidyr_data`, and let's take a glimpse of the data:
+
+```{r message=FALSE, echo=TRUE, fig.align='center', warning=FALSE}
+# The relig_income dataset is part of the tidyr package
+tidyr_data <- relig_income
+
+glimpse(tidyr_data)
+```
+
+After review, we can group the above data points into three buckets:
+
+* _religion_, stored in the rows,
+* _income_ spread across the column names, and
+* _count_ stored in the cell values
+
+While the "out of the box" format of the `tidyr_data` is nice on the eyes, it makes it more difficult to model or visualize. For this, we'll explore the `tidyr::pivot_longer()` function.
+
+# 12. PIVOT_LONGER
+
+The `pivot_longer()` function is structured as follows with four main arguments:
+
+```{r eval=FALSE}
+df %>% 
+  pivot_longer(
+    cols = c(col_name_a, col_name_b),
+    names_to = "new_col to capture all variables being pivoted",
+    values_to = "new col for values"
+  )
+```
+
+Lets put the above to practice! The goal of this exercise will be to pivot long the `tidyr_data` object and end up with a new tibble that only has 3 columns (instead of 11): _religion_, _income_, and _count_
+
+```{r message=FALSE, echo=TRUE}
+tidyr_long <- tidyr_data %>% 
+  pivot_longer(
+    cols = !religion,
+    names_to = "income",
+    values_to = "count" 
+  )
+
+glimpse(tidyr_long)
+```
+
+DECONSTRUCT THE CODE ABOVE:
+
+* The first argument in `pivot_longer()` describes which columns need to be reshaped
+  * In this case, it’s every column except "religion"
+* The `names_to` argument gives the name of the variable that will be created from the data stored in the column names, i.e. "income"
+* The `values_to` argument gives the name of the variable that will be created from the data stored in the cells, i.e. "count"
+
+Now, lets say your boss is "OK" with what you've created with the `tidyr_long` object, but they want to see a different cut of the data... This time, your boss wants to see "income" as the core identifier and wants to see "religion" as the columns to capture the "count" values... What to do?!?
+
+# 13. PIVOT_WIDER
+
+We've learned about pivoting data _long_ but now lets pivot the data _wide_ as the boss requested. The `pivot_wider()` function is structured as follows with three main arguments:
+
+```{r eval=FALSE}
+df %>% 
+  pivot_wider(
+    names_from = "column name containing the values you want to spread to new columns",
+    names_sort = TRUE, # the default is FALSE to sort by first appearance
+    values_from = "values that will populate the cell values"
+  )
+```
+
+Since the `tidyr_long` object has 18 rows, we should expect to see 19 columns after we pivot wide, i.e., 1 column for the identifier (income) + 18 new columns created from pivoting wide (religion). Putting this code to practice, let's create a new object called `tidyr_wide` with the `pivot_wider()` function:
+
+```{r message=FALSE, echo=TRUE}
+tidyr_wide <- tidyr_long %>% 
+  pivot_wider(
+    names_from = religion,
+    names_sort = TRUE,
+    values_from = count 
+  )
+
+glimpse(tidyr_wide)
+```
+DECONSTRUCT THE CODE ABOVE:
+
+* The first argument, `names_from`, identifies the column from which we'll be spreading the values contained in it to new columns
+  * In our case, it’s the "religion" field
+* The `names_sort` argument is optional (defaults to `FALSE`) - by setting it to `TRUE`, we ensure the new columns spread wide are in alphabetical order vs the order of first appearance
+* The `values_from` argument supplies the column name with the values that we want to use to populate the values in our reshaped wide dataset
+
+# 14. ADVANCED PIVOTING
+
+Sometimes there is a need to pivot your data long _then_ wide to get your desired results. Sometimes there is a need to summarize the data using your own custom functions. Below, we'll aim to do the following:
+
+* Start with our original `tidyr_data` object and pivot it long using `pivot_longer()`
+* Pipe the results into a `pivot_wider()` function but using different criteria to spread the data wide
+* Unlike the `pivot_wider()` example in section 13, this time, we're going to use a fourth argument in the `pivot_wider()` function, `values_fn`
+  * With `values_fn`, we'll be able to replace the values in our resulting table with categorical buckets representing the sample size
+  * This argument can easily be populated with summary stats such as `values_fn = mean`, but we can also pass through custom functions
+  * The example below will pass through a custom function, `custom_sample_size_fn()`, that will replace the numeric cell values with categorical representations of sample size
+
+```{r message=FALSE, echo=TRUE}
+custom_sample_size_fn <- function(value) {
+    case_when(value < 50 ~ "S",
+              value < 250 ~ "M",
+              value < 750 ~ "L",
+              TRUE ~ "XL")
+}
+
+tidyr_wide2 <- tidyr_data %>% 
+  pivot_longer(
+    cols = !religion,
+    names_to = "income",
+    values_to = "count" 
+  ) %>% 
+  pivot_wider(
+    names_from = religion,
+    names_sort = TRUE,
+    values_from = count,
+    values_fn = ~ custom_sample_size_fn(.x)
+  )
+
+glimpse(tidyr_wide2)
+```
+DECONSTRUCT THE CODE ABOVE:
+
+* Write a custom `case_when()` function to bucket sample size counts into categorical buckets,
+* Pivot the original `tidyr_data` long,
+* Pivot the resulting table wide, and
+* Replace the numeric values with categorical buckets using the custom function
+
+# 15.  GGPLOT2  INTRO
+
+![](ggplot2.png){width=30%}
 
 **Initial Data Prep**  
-Before we begin our data visualization - let's do some data prep using the tools above.  First, create 2 new variables:  carat.group, and table.group.  Then we will create 4 aggregated datasets as follows:
+Before we begin our data visualization - let's do some data prep using the tools above.  First, create 2 new variables: "carat.group", and "table.group". Then we will create 4 aggregated datasets as follows:
 
 * group by carat.group  
 * group by carat.group and cut  
@@ -378,21 +512,17 @@ Before we begin our data visualization - let's do some data prep using the tools
 
 
 ```{r message=FALSE, echo=TRUE, fig.align='center', warning=FALSE}
-
-
-# Create new variable carat.group
 df.diamonds <- df.diamonds %>%
-  mutate(carat.group = if_else(carat < 1, 0.5,
-                              if_else(carat < 2, 1.5,
-                                     if_else(carat < 3, 2.5,
-                                            if_else(carat < 4, 3.5, 4.5)))))
-
-# create new variable table.group
-df.diamonds <- df.diamonds %>%
-  mutate(table.group = if_else(table < 60, 60,
-                               if_else(table < 70, 70, 95)))
-
-
+  # Create new variable carat.group
+  mutate(carat.group = case_when(carat < 1 ~ 0.5,
+                                 carat < 2 ~ 1.5,
+                                 carat < 3 ~ 2.5,
+                                 carat < 4 ~ 3.5, 
+                                 TRUE ~ 4.5),
+         # create new variable table.group
+         table.group = case_when(table < 60 ~ 60,
+                                 table < 70 ~ 70,
+                                 TRUE ~ 95))
 
 # Create dataset for 1 variable visualizations
 df.agg1 <- df.diamonds %>%
@@ -418,8 +548,6 @@ df.agg4 <- df.diamonds %>%
   summarise(Total.Price = sum(price), Observations = n()) %>%
   mutate(average.price = Total.Price/Observations)
 
-
-
 ```
 
 
@@ -429,19 +557,19 @@ df.agg4 <- df.diamonds %>%
 
 Graphs created with ggplot2 use the following form:  
 
-ggplot(data,(aes(x,y)) + geom_XXXX()  
+`ggplot(data,(aes(x,y)) + geom_XXXX()`
 
 DECONSTRUCT THE LINE ABOVE:  
 
 * There are 2 components:  ggplot object and geometry  
 * For this lesson, the ggplot object will always contain the 2 arguments listed: data and aesthetics.  
 * All the graphs we will look at today have an x and y aesthetic defined.  Sometimes additional aesthetics as well.  
-* Add the geometry using a plus sign - similary to using the %>% with dplyr.  
+* Add the geometry using a plus sign - similarly to using the %>% with dplyr.  
 * Additional layers added with "+" as needed.  We will explore facets, labels and titles.  
 * Generic XXX in the line above determines your graph type:  
-  * geom_point():  scatter plot
+* `geom_point()`:  scatter plot
 
-# 12.  1 VARIABLE VIEW
+# 16.  1 VARIABLE VIEW
 
 Begin by creating your ggplot object as described above:  
 
@@ -509,7 +637,7 @@ scatterline1
 ```
 
 
-# 13. 2 VARIABLE VIEW
+# 17. 2 VARIABLE VIEW
 
 As always with ggplot2 - our first step is to create our ggplot object.  
 
@@ -579,7 +707,7 @@ scatterline2
 ```
 
 
-# 14. 3+ VARIABLE VIEW  
+# 18. 3+ VARIABLE VIEW  
 
 There is another powerful layer you can add to your graphs which allows you to analyze higher order dimensions (more variables).  This is called faceting.  Faceting means making copies of your graphs.  We are going to make a bunch of copies of the graphs we built up to now.  Each copy will represent a single level of our designated faceting variable(s).
 
@@ -633,7 +761,7 @@ scatterline4
 
 ```
 
-# 15. Plotly  
+# 19. Plotly  
 
 Plotly is a wrapper you can put around your ggplot graphs.  This wrapper greatly enhances ggplot graphs and is extremely simple to implement.  For these reasons - I use it as a default with all my graphs.  
 
