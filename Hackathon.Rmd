@@ -3,6 +3,7 @@ title: "SoCal RUG Hackathon"
 subtitle: "Intro to Tidyverse Training on 2022-04-02"
 output:
   html_document:
+    theme: cosmo
     df_print: paged
     toc: true
     toc_float: true
@@ -20,7 +21,7 @@ output:
 * To get started, we will look at 6 functions that cover most data manipulation needs
 * These functions (along with others not covered here) are bundled together in the [dplyr](https://dplyr.tidyverse.org/) package
   * **Terminology**: A "package" (or "library") is a bundle of functions that extends the base R vocabulary
-  * **Syntax**: Throughout this R Markdown document, in line function names will be written `like_this()`
+  * **Syntax**: Throughout this R Markdown document, in line functions and object names will be written `like_this`
 
 **THE 6 DPLYR FUNCTIONS COVERED:**  
 
@@ -84,8 +85,6 @@ You only need to install packages once.  You need to activate selected packages 
 
 * Base R functions are accessible without the need to load any packages
   * Fun fact: Base R was used to develop many of the `dplyr` functions
-* CRAN packages are an extension of base R
-
 
 
 # 4. IMPORT & EXPORT DATA 
@@ -97,6 +96,7 @@ There are several datasets that are part of base R or part of the various packag
 ```{r message=FALSE, echo=TRUE, fig.align='center', warning=FALSE}
 
 # READ IN AN INTERNAL DATASET
+
 df.diamonds <- diamonds
 
 ```
@@ -105,8 +105,8 @@ df.diamonds <- diamonds
 **IMPORT EXTERNAL CSV**  
 Generally speaking, you will not be using internal datasets for your projects.  It is more common to import external files, such as csv files.  This section demonstrates how to import an external csv file:
 
-* Save the clarity_map.csv file to your working directory.  
-* Use the code below to import this file into our current working session.  
+* Save the clarity_map.csv file to your working directory.
+* Use the code below to import this file into our current working session.
 
 
 ```{r message=FALSE, echo=TRUE, fig.align='center', warning=FALSE}
@@ -122,22 +122,23 @@ df.mapping <- fread('clarity_map.csv')
 
 DECONSTRUCTING CODE ABOVE:  
 
-* Left arrow should be interpreted as "Create a new object".  
-* NOTE:  2 functions demonstrated for importing data: fread() and read.csv()  
-* INTERPRET:  read.csv('file.csv') AS  "import into this active R session ('file.csv')  
-* INTERPRET: fread.csv('file.csv') AS "import into this active R session ('file.csv') - and do it much faster than read.csv would.  
-* Why not just use the quicker fread() every time?  It is not internal - requires us to load data.table - read.csv() is internal - no external packages required.  
+* The left arrow `<-` should be interpreted as "Create a new object"
+  * This is also known as the "assign operator"
+* NOTE: Two functions demonstrated for importing data: `fread()` and `read.csv()`  
+* INTERPRET: `read.csv('file.csv')` AS  "import into this active R session ('file.csv')  
+* INTERPRET: `fread.csv('file.csv')` AS "import into this active R session ('file.csv') - and do it much faster than read.csv would.  
+* Why not just use the quicker `fread()` every time?  It is not internal - requires us to load data.table - `read.csv()` is internal - no external packages required.  
 
 TRANSLATE CODE TO ENGLISH  
 
-* Create a new object called data.valyear by not so quickly importing the file 'diamonds.csv'.
-* Create a new object called data.valyear by much more quickly importing the file 'diamonds.csv'  
+* Create a new object called `df.mapping` by not so quickly importing the file 'clarity_map.csv'.
+* Create a new object called `df.mapping` by much more quickly importing the file 'clarity_map.csv'  
 * We did not need to specify a directory because these files are in our working directory.  
 
 Once you import the data - you will see your 2 new objects in the upper right hand console:  
 
-* df.diamonds1  
-* df.diamonds2
+* `df.diamonds1`
+* `df.diamonds2`
 
 NOTE:  We did not have to specify a directory to export to or import from.  This is because we set our working directory - and R knows to look here.  
 
@@ -158,22 +159,22 @@ dim(df.agg)
 
 DECONSTRUCT THE CODE ABOVE  
 
-* %>% is called a pipe.  
+* `%>%` is called a pipe.  
 * Interpret a pipe as saying "THEN"  
 * Code snippets that are piped together will be run together - not like our earlier commands.  
 * Review:  left-hand arrow interpreted as create a new object.  
-* Interpret group_by(column) as: 'combine your dataset (into levels of selected column)'.
-* Interpret summarise as: 'Sum totals within each group_by level (these are the values to sum)'.  
-* NOTE: group_by() and summarise() are almost always used in tandem.  
+* Interpret `group_by(column)` as: 'combine your dataset (into levels of selected column)'.
+* Interpret `summarise()` as: 'Sum totals within each group_by level (these are the values to sum)'.  
+* NOTE: `group_by()` and `summarise()` are almost always used in tandem.  
 
 TRANSLATE THE CODE TO ENGLISH  
 
-* Create a new object named df.group as follows:  
-* Start with df.diamonds THEN  
-* Group by the column 'table' THEN 
-* Sum total price within each level table, and call this variable "Total.Price".
+* Create a new object named `df.group` as follows:  
+* Start with `df.diamonds` THEN  
+* Group by the column 'clarity' THEN 
+* Sum total price within each level table, and call this variable 'Total.Price'
 
-Notice there is a new object in our upper left hand panel called df.agg.  This object has 127 rows and 2 columns.  Click on object for further inspection reveals the columns are table and total.price as expected.
+Notice there is a new object in our upper left hand panel called `df.agg`.  This object has 127 rows and 2 columns.  Click on object for further inspection reveals the columns are 'clarity' and 'Total.Price' as expected.
 
 
 # 6. MUTATE
@@ -189,8 +190,8 @@ dim(df.agg)
 
 DECONSTRUCT THE CODE ABOVE  
 
-* Interpret mutate(variable.name) as "create new variable and that variable name is "variable.name".  
-* In this case, the new variable is called average.price and it is equal to total.price divided by observations.
+* Interpret `mutate(variable.name)` as "create new variable and that variable name is "variable.name".  
+* In this case, the new variable is called 'average.price' and it is equal to 'Total.Price' divided by observations.
 
 # 7. INNER JOIN  
 
@@ -223,43 +224,44 @@ dim(df.agg)
 
 DECONSTRUCT THE CODE ABOVE:  
 
-* Interpret function inner_join() as "perform an inner join on previous table (with new table named here).  
+* Interpret function `inner_join()` as "perform an inner join on previous table (with new table named here).  
 * Inner join keeps all rows in common to both tables.  My most commonly used - mappings I build.  
 * Left join is also used frequently.  
-* This will add the column "Mapping" to the existing df.agg table.  
+* This will add the column "Mapping" to the existing `df.agg` table.  
 
 TRANSLATE CODE TO ENGLISH:  
 
-* Create a new object alled df.agg.  
-* To create this object, start with df.agg THEN  
-* Join to the df.mapping tbale by the column 'clarity'. 
+* Create a new object called `df.agg`  
+* To create this object, start with `df.agg` THEN  
+* Join to the `df.mapping` table by the column 'clarity'
 
-As with everything, there is more than one way to accomplish this task.  The snippet below demonstrates an alternative method using ifelse.  The end result is identical to the inner_join() method - so both methods are correct.  A table makes sense when you have a lot of levels.  Ifelse is easier if you have just a few levels.  Ultimately, this is a personal choice and depends on multiple factors that are different for each individual and each project.  
+As with everything, there is more than one way to accomplish this task.  The snippet below demonstrates an alternative method using `dplyr::if_else()`.  The end result is identical to the `inner_join()` method - so both methods are correct.  A table makes sense when you have a lot of levels. `if_else()` is easier if you have just a few levels.  Ultimately, this is a personal choice and depends on multiple factors that are different for each individual and each project.  
 
 ```{r message=FALSE, echo=TRUE, fig.align='center', warning=FALSE}
 
+df.agg <- df.agg %>%
+  mutate(clarity.map2 = if_else(clarity %in% c('I1','SI2'),'Bad',
+                                if_else(clarity %in% c('SI1','VS2','VS1','VVS2'),'Medium',
+                                        if_else(clarity %in% c('VVS1','IF'),'Good','Undefined'))))
 
+```
 
+Nested `if_else()` functions (or "`if_else()` functions within `if_else()` functions"), as shown above, can be difficult to digest. A third alternative is using `dplyr::case_when()` - If you're comfortable with SQL, this function will feel right at home. Below is an example of `case_when()` within a `mutate()` function:
+
+```{r message=FALSE, echo=TRUE, fig.align='center', warning=FALSE}
 
 df.agg <- df.agg %>%
-  mutate(clarity.map2 = ifelse(clarity %in% c('I1','SI2'),'Bad',
-                              ifelse(clarity %in% c('SI1','VS2','VS1','VVS2'),'Medium',
-                                     ifelse(clarity %in% c('VVS1','IF'),'Good','Undefined'))))
-
-
+  mutate(clarity.map3 = case_when(clarity %in% c('I1','SI2') ~ 'Bad',
+                                  clarity %in% c('SI1','VS2','VS1','VVS2') ~ 'Medium',
+                                  clarity %in% c('VVS1','IF') ~ 'Good',
+                                  TRUE ~ 'Undefined'))
 
 ```
 
 DECONSTRUCT THE CODE ABOVE:  
 
-* Notice the use of %in% : this is a boolean based on being an element of a list.  
-* Notice the use of c()
-
-VERSION 2: (not coded yet - original method in R for Actuaries):  
-
-* Notice the use of "==".  This is used for conditional statements.  Assign values with "=" (like in mutate).  
-* The "|" character means OR.  Use "&" for AND.  
-* Ifelse works identical to Excel if statement: ifelse(condition, output if TRUE, output if FALSE).  
+* Notice the use of `%in%`: this is a boolean based on being an element of a list.  
+* Notice the use of `c()`: this is base R function to concatenate strings and other R objects
 
 TRANSLATE CODE TO ENGLISH:  
 
@@ -278,49 +280,44 @@ df.agg <- df.agg %>%
 
 DECONSTRUCT THE CODE ABOVE:  
 
-* Interpret the function filter() as: "only look at rows where (this is true)".  
+* Interpret the function `filter()` as: "only look at rows where (this is true)".  
 
 TRANSLATE THE CODE TO ENGLISH:  
 
-* Create a new object called df.agg.  
-* Begin with the current object df.agg THEN
+* Create a new object called `df.agg`  
+* Begin with the current object `df.agg` THEN
 * Only include rows where the value for the column "clarity.map" is equal to the value 'Good'.  
 
 Filter will result in less than or equal to the original number of rows.  Filter will not impact the number of columns.  
 
 # 9. SELECT  
 
-Remove the column "clarity.map2"  
+Remove the columns "clarity.map2" and "clarity.map3" for housekeeping
 
 ```{r message=FALSE, echo=TRUE, fig.align='center', warning=FALSE}
 
 df.agg1 <- df.agg %>%
-  select(c('clarity', 'Total.Price', 'Observations', 'average.price', 'clarity.map'))
+  select('clarity', 'Total.Price', 'Observations', 'average.price', 'clarity.map')
 
 
 ```
 
-
 DECONSTRUCT THE CODE ABOVE:  
 
-* c() is the combine (concatenate?) function.  Creates a list?  
-* This creates a list of elements that you define.  
-* Use this to apply a function over several arguments - such as several column names.  BETTER?  
-* INterpret select() as "select only the columns(in this list).  
+* Interpret `select()` as "select the specific columns being stated"  
 
 TRANSLATE CODE TO ENGLISH:  
 
-* Create a new object called df.agg  
-* Begin with the object df.agg THEN  
-* Select only the columns in this list: c('table', 'average.price')  
+* Create a new object called `df.agg1`  
+* Begin with the object `df.agg` THEN  
+* Select only the columns explicitly stated in the `select()` function
 
 ALTERNATE METHOD FOR TASK 7:  
 
 ```{r message=FALSE, echo=TRUE, fig.align='center', warning=FALSE}
 
-
 df.agg2 <- df.agg %>%
-  select(-c('clarity.map2'))
+  select(-c('clarity.map2', 'clarity.map3'))
 
 df.agg <- df.agg1
 rm(df.agg1, df.agg2)
@@ -330,41 +327,41 @@ rm(df.agg1, df.agg2)
 DECONSTRUCT THE CODE ABOVE:  
 
 * Instead of specifying which columns to keep - it is sometimes easier to define which columns NOT to keep.  
-* This is done by placing the negative sign before c()  
+* This is done by placing the negative sign before `c()`  
 
-TRANSLATE THE CODE TO ENGLISH:  
+TRANSLATE THE CODE TO ENGLISH:
 
-* Create a new object called df.agg  
-* Begin with the current object df.agg THEN  
-* Select all columns EXCEPT table
+* Create a new object called `df.agg2`  
+* Begin with the current object `df.agg` THEN  
+* Select all columns EXCEPT "clarity.map2" and "clarity.map3"
 
 # 10. dplyr SUMMARY  
 
 We have now taken the diamonds dataset THEN  
 
 * We grouped by table THEN we summed price THEN  
-* we added a new column called average.price  THEN  
-* we joined the clarity.mapping table THEN  
+* we added a new column called "average.price"  THEN  
+* we joined the `df.mapping` table THEN  
 * we filtered out rows not mapped to 'Good' THEN 
-* we removed a column  
+* we removed two columns
 
-This was all done sequentially on the same dataset.  This is a good representation of how code is created.  Very piecemeal and iterative.  It is very rare that you go into a project knowing all the tasks you need to complete sequentially.  Ultimately, however, you do get your final result - like in our simplifed example above.  At this point, you can use the pipe operator to clean up and chain your code together as follows:  
+This was all done sequentially on the same dataset.  This is a good representation of how code is created.  Very piecemeal and iterative.  It is very rare that you go into a project knowing all the tasks you need to complete sequentially.  Ultimately, however, you do get your final result - like in our simplified example above.  At this point, you can use the pipe operator to clean up and chain your code together as follows:  
 
 ```{r message=FALSE, echo=TRUE, fig.align='center', warning=FALSE}
-
-
 df.chained <- df.diamonds %>%
   group_by(clarity) %>%
   summarise(Total.Price = sum(price), Observations = n()) %>%
   mutate(average.price = Total.Price/Observations) %>%
   inner_join(df.mapping, by = 'clarity') %>%
-  mutate(clarity.map2 = ifelse(clarity %in% c('I1','SI2'),'Bad',
-                              ifelse(clarity %in% c('SI1','VS2','VS1','VVS2'),'Medium',
-                                     ifelse(clarity %in% c('VVS1','1F'),'Good','Undefined')))) %>%
+  mutate(clarity.map2 = if_else(clarity %in% c('I1','SI2'),'Bad',
+                              if_else(clarity %in% c('SI1','VS2','VS1','VVS2'),'Medium',
+                                     if_else(clarity %in% c('VVS1','1F'),'Good','Undefined'))),
+         clarity.map3 = case_when(clarity %in% c('I1','SI2') ~ 'Bad',
+                                  clarity %in% c('SI1','VS2','VS1','VVS2') ~ 'Medium',
+                                  clarity %in% c('VVS1','IF') ~ 'Good',
+                                  TRUE ~ 'Undefined')) %>%
   filter(clarity.map == 'Good') %>%
   select(c('clarity', 'average.price'))
-
-
 
 ```
 
@@ -385,15 +382,15 @@ Before we begin our data visualization - let's do some data prep using the tools
 
 # Create new variable carat.group
 df.diamonds <- df.diamonds %>%
-  mutate(carat.group = ifelse(carat < 1, 0.5,
-                              ifelse(carat < 2, 1.5,
-                                     ifelse(carat < 3, 2.5,
-                                            ifelse(carat < 4, 3.5, 4.5)))))
+  mutate(carat.group = if_else(carat < 1, 0.5,
+                              if_else(carat < 2, 1.5,
+                                     if_else(carat < 3, 2.5,
+                                            if_else(carat < 4, 3.5, 4.5)))))
 
 # create new variable table.group
 df.diamonds <- df.diamonds %>%
-  mutate(table.group = ifelse(table < 60, 60,
-                               ifelse(table < 70, 70, 95)))
+  mutate(table.group = if_else(table < 60, 60,
+                               if_else(table < 70, 70, 95)))
 
 
 
